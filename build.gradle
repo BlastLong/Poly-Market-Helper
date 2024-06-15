@@ -1,0 +1,44 @@
+plugins {
+
+}
+apply {
+
+}
+
+subprojects {
+    tasks.withType(GenerateModuleMetadata) {
+        enabled = false
+    }
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Sponge / Mixin'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
+    }
+
+    tasks.withType(ProcessResources) {
+        // this will ensure that this task is redone when the versions change.
+        inputs.property("version", version)
+
+        filesMatching(["META-INF/mods.toml", "pack.mcmeta", "fabric.mod.json"]) {
+            expand([
+                     "fabricApiVersion" : fabricApiVersion,
+                     "fabricLoaderVersion" : fabricLoaderVersion,
+                     "forgeVersionRange" : forgeVersionRange,
+                     "loaderVersionRange" : loaderVersionRange,
+                     "minecraftVersion" : minecraftVersion,
+                     "minecraftVersionRange" : minecraftVersionRange,
+                     "fabricMinecraftVersion" : fabricMinecraftVersion,
+                     "modAuthor" : modAuthor,
+                     "modDescription" : modDescription,
+                     "modCredits" : modCredits,
+                     "modId" : modId,
+                     "modJavaVersion" : modJavaVersion,
+                     "modName" : modName,
+                     "version" : version
+            ])
+        }
+    }
+}

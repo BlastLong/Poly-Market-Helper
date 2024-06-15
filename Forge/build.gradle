@@ -1,0 +1,106 @@
+buildscript {
+    repositories {
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'net.minecraftforge.gradle' version '6.0.+'
+}
+
+apply plugin: 'java'
+apply plugin: 'org.spongepowered.mixin'
+
+def baseArchivesName = "${modId}-${minecraftVersion}-forge"
+base {
+    archivesName.set(baseArchivesName)
+}
+
+sourceSets {
+
+}
+
+processResources {
+    from project(":Common").sourceSets.main.resources
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
+    compileOnly project(":Common")
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraftVersion
+
+    // accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
+
+    runs {
+        client {
+            taskName 'Client'
+            property 'forge.logging.console.level', 'debug'
+            property 'terminal.ansi', 'true'
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+
+            arg "-mixin.config=${modId}.common.mixins.json"
+            arg "-mixin.config=${modId}.forge.mixins.json"
+
+            mods {
+                create(modId) {
+                    source sourceSets.main
+                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+        server {
+            taskName 'Server'
+            property 'forge.logging.console.level', 'debug'
+            property 'terminal.ansi', 'true'
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+
+            arg "-mixin.config=${modId}.common.mixins.json"
+            arg "-mixin.config=${modId}.forge.mixins.json"
+
+            mods {
+                create(modId) {
+                    source sourceSets.main
+                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+mixin {
+    // Tells the mixin plugin where to put the generated refmap file.
+    add sourceSets.main, "${modId}.mixin.refmap.json"
+
+    config "${modId}.common.mixins.json"
+    config "${modId}.forge.mixins.json"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(modJavaVersion))
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    source(project(":Common").sourceSets.main.allSource)
+    javaToolchains {
+        compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(modJavaVersion))
+        }
+    }
+}
