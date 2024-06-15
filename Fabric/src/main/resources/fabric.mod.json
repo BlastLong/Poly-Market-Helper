@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "${modId}",
+  "version": "${version}",
+
+  "name": "${modName}",
+  "description": "${modDescription}",
+  "authors": [
+    "${modAuthor}"
+  ],
+  "credits": [
+    "${modCredits}"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "All rights reserved",
+  "icon": "logo.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.blastlong.pmh.PolyMarketHelper"
+    ]
+  },
+  "mixins": [
+    "pmh.common.mixins.json",
+    "pmh.fabric.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=${fabricLoaderVersion}",
+    "fabric-key-binding-api-v1": "*",
+    "minecraft": "1.20.x",
+    "java": ">=${modJavaVersion}"
+  }
+}

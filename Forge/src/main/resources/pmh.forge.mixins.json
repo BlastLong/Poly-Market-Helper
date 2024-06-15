@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.blastlong.pmh.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "pmh.mixin.refmap.json",
+  "server": [
+  ],
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "minVersion": "0.8"
+}

@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="${loaderVersionRange}"
+license="All rights reserved"
+[[mods]]
+modId="${modId}"
+version="${version}"
+displayName="${modName}"
+logoFile="logo.png"
+authors="${modAuthor}"
+description='''
+${modDescription}
+'''
+credits="${modCredits}"
+
+[[dependencies.pmh]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forgeVersionRange}"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.pmh]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraftVersionRange}"
+    ordering="NONE"
+    side="CLIENT"

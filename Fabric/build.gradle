@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+    id 'fabric-loom' version '1.1-SNAPSHOT'
+}
+
+def baseArchivesName = "${modId}-${minecraftVersion}-fabric"
+base {
+    archivesName.set(baseArchivesName)
+}
+
+sourceSets {
+
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabricLoaderVersion}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+    compileOnly project(":Common")
+}
+
+loom {
+    runs {
+        client {
+            client()
+            configName = "Fabric Client"
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            configName = "Fabric Server"
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+}
+
+loom.mixin {
+    defaultRefmapName = "${modId}.mixin.refmap.json"
+}
+
+processResources {
+    from project(":Common").sourceSets.main.resources
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(modJavaVersion))
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+    source(project(":Common").sourceSets.main.allSource)
+    javaToolchains {
+        compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(modJavaVersion))
+        }
+    }
+}
