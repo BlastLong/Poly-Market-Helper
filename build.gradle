@@ -24,20 +24,20 @@ subprojects {
 
         filesMatching(["META-INF/mods.toml", "pack.mcmeta", "fabric.mod.json"]) {
             expand([
-                     "fabricApiVersion" : fabricApiVersion,
-                     "fabricLoaderVersion" : fabricLoaderVersion,
-                     "forgeVersionRange" : forgeVersionRange,
-                     "loaderVersionRange" : loaderVersionRange,
-                     "minecraftVersion" : minecraftVersion,
-                     "minecraftVersionRange" : minecraftVersionRange,
-                     "fabricMinecraftVersion" : fabricMinecraftVersion,
-                     "modAuthor" : modAuthor,
-                     "modDescription" : modDescription,
-                     "modCredits" : modCredits,
-                     "modId" : modId,
-                     "modJavaVersion" : modJavaVersion,
-                     "modName" : modName,
-                     "version" : version
+                    "fabricApiVersion" : fabricApiVersion,
+                    "fabricLoaderVersion" : fabricLoaderVersion,
+                    "forgeVersionRange" : forgeVersionRange,
+                    "loaderVersionRange" : loaderVersionRange,
+                    "minecraftVersion" : minecraftVersion,
+                    "minecraftVersionRange" : minecraftVersionRange,
+                    "fabricMinecraftVersion" : fabricMinecraftVersion,
+                    "modAuthor" : modAuthor,
+                    "modDescription" : modDescription,
+                    "modCredits" : modCredits,
+                    "modId" : modId,
+                    "modJavaVersion" : modJavaVersion,
+                    "modName" : modName,
+                    "version" : version
             ])
         }
     }
