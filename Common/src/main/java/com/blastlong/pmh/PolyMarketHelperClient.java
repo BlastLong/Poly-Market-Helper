@@ -1,6 +1,8 @@
 package com.blastlong.pmh;
 
+import com.blastlong.pmh.gui.PolyMarketScreen;
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
@@ -11,8 +13,12 @@ public class PolyMarketHelperClient {
 
     public static Logger LOGGER = LogUtils.getLogger();
 
+    private final PolyMarketScreen polyMarketScreen;
+
     public PolyMarketHelperClient() {
         instance = this;
+
+        polyMarketScreen = new PolyMarketScreen();
     }
 
     public static PolyMarketHelperClient getInstance() {
@@ -20,6 +26,10 @@ public class PolyMarketHelperClient {
     }
 
     public void init() {
+
+    }
+
+    public void openScreen() {
 
     }
 }
