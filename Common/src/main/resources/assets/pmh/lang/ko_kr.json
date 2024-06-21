@@ -1,4 +1,13 @@
 {
+  "pmh.label.title_suffix": " 물품 목록",
+
+  "pmh.label.name": "이름",
+  "pmh.label.quantity": "수량",
+  "pmh.label.price": "가격",
+  "pmh.label.unit_price": "단위가격",
+
+  "pmh.search_box": "아이템 이름으로 검색하세요.",
+
   "key.pmh.category": "폴리 마켓 도우미",
   "key.pmh.open_screen": "폴리 마켓 열기"
 }

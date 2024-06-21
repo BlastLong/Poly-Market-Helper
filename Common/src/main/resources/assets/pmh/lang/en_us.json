@@ -1,4 +1,13 @@
 {
+  "pmh.label.title_suffix": " Item List",
+
+  "pmh.label.name": "Name",
+  "pmh.label.quantity": "Quantity",
+  "pmh.label.price": "Count",
+  "pmh.label.unit_price": "Unit Count",
+
+  "pmh.search_box": "Search with item name.",
+
   "key.pmh.category": "Poly Market Helper",
   "key.pmh.open_screen": "Open Poly Market"
 }
