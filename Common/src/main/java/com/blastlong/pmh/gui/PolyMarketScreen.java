@@ -1,9 +1,9 @@
 package com.blastlong.pmh.gui;
 
-import com.blastlong.pmh.gui.button.ArrowButton;
-import com.blastlong.pmh.gui.button.ImageButton;
-import com.blastlong.pmh.gui.button.ItemButton;
-import com.blastlong.pmh.gui.button.PageNumberButton;
+import com.blastlong.pmh.PolyMarketHelperClient;
+import com.blastlong.pmh.data.DataManager;
+import com.blastlong.pmh.data.object.ItemObject;
+import com.blastlong.pmh.gui.button.*;
 import com.blastlong.pmh.gui.util.ArrowButtonFlag;
 import com.blastlong.pmh.gui.util.Coordinate;
 import com.blastlong.pmh.gui.util.Rect;
@@ -29,35 +29,45 @@ public class PolyMarketScreen extends Screen {
 
     public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("pmh", "textures/gui/poly_market_background.png");
 
-    private static final Rect searchButtonRect = new Rect(224, 5, 9, 8);
-    private static final TextureRect searchButtonTextureRect = new TextureRect(39, 172);
+    private static final Rect searchButtonRect = new Rect(212, 5, 9, 8);
+    private static final TextureRect searchButtonTextureRect = new TextureRect(39, 177);
     private static final Coordinate searchButtonRenderOffset = new Coordinate(3, 6);
 
-    private static final Rect leftArrowButtonRect = new Rect(50, 146, 13, 6);
-    private static final TextureRect leftArrowButtonDeactivatedTextureRect = new TextureRect(0, 172);
-    private static final TextureRect leftArrowButtonActivatedTextureRect = new TextureRect(13, 172);
-    private static final TextureRect leftArrowButtonHighlightedTextureRect = new TextureRect(26, 172);
+    private static final Rect reloadButtonRect = new Rect(225, 4, 10, 10);
+    private static final TextureRect reloadButtonTextureRect = new TextureRect(48, 177);
 
-    private static final Rect rightArrowButtonRect = new Rect(176, 146, 13, 6);
-    private static final TextureRect rightArrowButtonDeactivatedTextureRect = new TextureRect(0, 178);
-    private static final TextureRect rightArrowButtonActivatedTextureRect = new TextureRect(13, 178);
-    private static final TextureRect rightArrowButtonHighlightedTextureRect = new TextureRect(26, 178);
+    private static final Rect leftArrowButtonRect = new Rect(50, 151, 13, 6);
+    private static final TextureRect leftArrowButtonDeactivatedTextureRect = new TextureRect(0, 177);
+    private static final TextureRect leftArrowButtonActivatedTextureRect = new TextureRect(13, 177);
+    private static final TextureRect leftArrowButtonHighlightedTextureRect = new TextureRect(26, 177);
 
-    private static final Rect labelBarRect = new Rect(5, 19, 230, 10);
-    private static final TextureRect labelBarTextureRect = new TextureRect(0, 211);
+    private static final Rect rightArrowButtonRect = new Rect(176, 151, 13, 6);
+    private static final TextureRect rightArrowButtonDeactivatedTextureRect = new TextureRect(0, 183);
+    private static final TextureRect rightArrowButtonActivatedTextureRect = new TextureRect(13, 183);
+    private static final TextureRect rightArrowButtonHighlightedTextureRect = new TextureRect(26, 183);
 
-    private static final Coordinate nameLabelCoordinate = new Coordinate(8, 21);
-    private static final Coordinate quantityLabelCoordinate = new Coordinate(175, 21);
-    private static final Coordinate priceLabelCoordinate = new Coordinate(212, 21);
+    private static final Rect labelBarRect = new Rect(5, 24, 230, 10);
+    private static final TextureRect labelBarTextureRect = new TextureRect(0, 216);
 
-    private static final Rect itemButtonRect = new Rect(5, 33, 230, 15);
-    private static final TextureRect itemButtonTextureRect = new TextureRect(0, 157);
-    private static final TextureRect itemButtonHighlightTextureRect = new TextureRect(0, 184);
+    private static final Coordinate nameLabelCoordinate = new Coordinate(8, 26);
+    private static final Coordinate amountLabelCoordinate = new Coordinate(175, 26);
+    private static final Coordinate priceLabelCoordinate = new Coordinate(212, 26);
 
-    private static final Rect searchBoxRect = new Rect(5, 4, 230, 10);
-    private static final TextureRect searchBoxTextureRect = new TextureRect(0, 201);
+    private static final Rect itemButtonRect = new Rect(5, 38, 230, 15);
+    private static final TextureRect itemButtonTextureRect = new TextureRect(0, 162);
+    private static final TextureRect itemButtonHighlightTextureRect = new TextureRect(0, 189);
+
+    private static final Rect searchBoxRect = new Rect(5, 4, 218, 10);
+    private static final TextureRect searchBoxTextureRect = new TextureRect(0, 206);
+
+    private static final Rect validOnlyToggleButtonRect = new Rect(6, 16, 6, 6);
+    private static final TextureRect validOnlyToggleButtonOffTextureRect = new TextureRect(69, 177);
+    private static final TextureRect validOnlyToggleButtonOnTextureRect = new TextureRect(75, 177);
+
+    private static final Coordinate updateDateLabelCoordinate = new Coordinate(234, 16);
 
     private static final int labelSize = 7;
+    private static final int dateLabelSize = 5;
 
     private static final int pageNumberButtonOffset = 1;
     private static final int pageNumberSize = 5;
@@ -65,7 +75,8 @@ public class PolyMarketScreen extends Screen {
 
     private static final int itemButtonInterval = 3;
 
-    private Minecraft mc;
+    private final Minecraft mc;
+    private final PolyMarketHelperClient client;
 
     private final int width, height;
 
@@ -73,6 +84,12 @@ public class PolyMarketScreen extends Screen {
 
     private final ArrowButtonFlag leftButtonActivated = new ArrowButtonFlag();
     private final ArrowButtonFlag rightButtonActivated = new ArrowButtonFlag();
+
+    private boolean isValidOnly = false;
+
+    private boolean isFiltered = false;
+    private List<List<ItemObject>> filteredList = null;
+    private String filterLine = "";
 
     private int maxPageNumber = 7;
     private int pageNumber = 1;
@@ -88,9 +105,10 @@ public class PolyMarketScreen extends Screen {
     public PolyMarketScreen() {
         super(Component.literal("Poly Market Screen"));
         mc = Minecraft.getInstance();
+        client = PolyMarketHelperClient.getInstance();
 
         width = 239;
-        height = 157;
+        height = 162;
     }
 
     protected void init() {
@@ -99,7 +117,11 @@ public class PolyMarketScreen extends Screen {
         pageNumberButtonList.clear();
         itemButtonList.clear();
 
+        updateMaxPageNumber();
+
         addSearchButton();
+        addReloadButton();
+        addValidOnlyToggleButton();
         addArrowButtons();
         addPageNumberButtons();
         addItemButtons();
@@ -115,7 +137,55 @@ public class PolyMarketScreen extends Screen {
         searchBox.setBordered(false);
         this.addWidget(searchBox);
 
+        if (!filterLine.isEmpty())
+            searchBox.setValue(filterLine);
+
         updateArrowButtonsState();
+    }
+
+    private void reload() {
+        client.loadItemMap();
+        reloadWidgets();
+        filterLine = "";
+        searchBox.setValue("");
+        clearSearch();
+        search();       // to reload the related to search
+    }
+
+    private void reloadWidgets() {
+        pageNumber = 1;
+        clearWidgets();
+        init();
+        clearSearch();
+        search();
+    }
+
+
+    private void updateMaxPageNumber() {
+        List<List<ItemObject>> itemObjectsList = getItemObjectsList();
+        maxPageNumber = (int) Math.ceil((double) itemObjectsList.size() / 6);
+    }
+
+    private void search() {
+        filterLine = searchBox.getValue();
+        clearSearch();
+
+        if (!filterLine.isEmpty()) {
+            String[] keywords = filterLine.split(" ");
+            filteredList = DataManager.getFilteredListByKeywords(getItemObjectsList(), keywords);
+            isFiltered = true;
+        }
+
+        updateMaxPageNumber();
+        pageNumber = 1;
+        updatePageNumberButtons();
+        updateArrowButtonsState();
+        updateItemButtons();
+    }
+
+    private void clearSearch() {
+        isFiltered = false;
+        filteredList = null;
     }
 
     private void addSearchButton() {
@@ -128,6 +198,42 @@ public class PolyMarketScreen extends Screen {
                         TEXTURE_LOCATION,
                         button -> {
                             onSearchButtonPressed();
+                        })
+        );
+    }
+
+    private void addReloadButton() {
+        this.addRenderableWidget(
+                new ImageButton(
+                        getRegularX() + reloadButtonRect.x(),
+                        getRegularY() + reloadButtonRect.y(),
+                        reloadButtonTextureRect.u(), reloadButtonTextureRect.v(),
+                        reloadButtonRect.width(), reloadButtonRect.height(),
+                        TEXTURE_LOCATION,
+                        button -> {
+                            onReloadButtonPressed();
+                        })
+        );
+    }
+
+    private void addValidOnlyToggleButton() {
+        String content = "pmh.label.valid_only";
+        Component component = Component.translatable(content);
+        int contentWidth = (int) (mc.font.width(component) * ToggleButton.contentSize / 9f);
+
+        this.addRenderableWidget(
+                new ToggleButton(
+                        getRegularX() + validOnlyToggleButtonRect.x(),
+                        getRegularY() + validOnlyToggleButtonRect.y(),
+                        validOnlyToggleButtonOffTextureRect.u(), validOnlyToggleButtonOffTextureRect.v(),
+                        validOnlyToggleButtonOnTextureRect.u(), validOnlyToggleButtonOnTextureRect.v(),
+                        validOnlyToggleButtonRect.width(), validOnlyToggleButtonRect.height(),
+                        validOnlyToggleButtonRect.width() + contentWidth, validOnlyToggleButtonRect.height(),
+                        isValidOnly,
+                        content,
+                        TEXTURE_LOCATION,
+                        button -> {
+                            onValidOnlyToggleButtonPressed();
                         })
         );
     }
@@ -209,7 +315,6 @@ public class PolyMarketScreen extends Screen {
                 width += (stringLength(pageNumber) + pageNumberInterval);
 
             List<Integer> pageNumberList = new ArrayList<>();
-            System.out.println();
             while (true) {
                 if (isLeftEnd) {
                     rightNumber += 1;
@@ -258,7 +363,7 @@ public class PolyMarketScreen extends Screen {
 //            for (Integer integer : pageNumberList) {
 //                output.append(integer).append(", ");
 //            }
-//            System.out.println(output);
+//            PolyMarketHelperClient.LOGGER.info(output);
             if (pageNumber != 1 && pageNumber != maxPageNumber)
                 pageNumberList.add(pageNumber);
 
@@ -331,7 +436,23 @@ public class PolyMarketScreen extends Screen {
     }
 
     private void addItemButtons() {
-        for (int i = 0; i < 6; i++) {
+        List<List<ItemObject>> itemObjectsList = getItemObjectsList();
+
+        int size = itemObjectsList.size();
+        int itemButtonCount = Math.min(size - (pageNumber - 1) * 6, 6);
+        for (int i = 0; i < itemButtonCount; i++) {
+            List<ItemObject> itemObjectList = itemObjectsList.get((pageNumber - 1) * 6 + i);
+            String itemName = null;
+            int amount = 0;
+            float leastUnitPrice = Float.MAX_VALUE;
+            for (Object object : itemObjectList) {
+                ItemObject itemObject = (ItemObject) object;
+                itemName = itemObject.itemName;
+                amount += itemObject.amount;
+                if (leastUnitPrice > itemObject.unitPrice)
+                    leastUnitPrice = itemObject.unitPrice;
+            }
+
             final int finalI = i;
             ItemButton itemButton = new ItemButton(
                     getRegularX() + itemButtonRect.x(),
@@ -339,9 +460,9 @@ public class PolyMarketScreen extends Screen {
                     itemButtonTextureRect.u(), itemButtonTextureRect.v(),
                     itemButtonHighlightTextureRect.u(), itemButtonHighlightTextureRect.v(),
                     itemButtonRect.width(), itemButtonRect.height(),
-                    "ItemName" + i,
-                    (i + 1) * 20,
-                    (i + 1) * 7,
+                    itemName,
+                    amount,
+                    leastUnitPrice,
                     TEXTURE_LOCATION,
                     button -> {
                         onItemButtonPressed(finalI);
@@ -369,6 +490,7 @@ public class PolyMarketScreen extends Screen {
     private void updatePageNumberButtons() {
         clearPageNumberButtons();
         addPageNumberButtons();
+        updateItemButtons();
     }
 
     private void clearItemButtons() {
@@ -388,6 +510,7 @@ public class PolyMarketScreen extends Screen {
         super.render(guiGraphics, p_98283_, p_98284_, p_98285_);
 
         renderLabels(guiGraphics);
+        renderUpdateDateLabel(guiGraphics);
         renderDots(guiGraphics);
     }
 
@@ -428,8 +551,14 @@ public class PolyMarketScreen extends Screen {
                 labelBarRect.width(), labelBarRect.height());
 
         drawString(guiGraphics, "pmh.label.name", nameLabelCoordinate.x(), nameLabelCoordinate.y(), labelSize);
-        drawCenteredString(guiGraphics, "pmh.label.quantity", quantityLabelCoordinate.x(), quantityLabelCoordinate.y(), labelSize);
+        drawCenteredString(guiGraphics, "pmh.label.amount", amountLabelCoordinate.x(), amountLabelCoordinate.y(), labelSize);
         drawCenteredString(guiGraphics, "pmh.label.price", priceLabelCoordinate.x(), priceLabelCoordinate.y(), labelSize);
+    }
+
+    private void renderUpdateDateLabel(GuiGraphics guiGraphics) {
+        String content = client.getUpdateDate();
+        int x = updateDateLabelCoordinate.x() - (int) ((mc.font.width(Component.translatable(content)) * ((float) dateLabelSize / 9f)));
+        drawString(guiGraphics, content, x, updateDateLabelCoordinate.y(), dateLabelSize);
     }
 
     private void renderDots(GuiGraphics guiGraphics) {
@@ -451,10 +580,11 @@ public class PolyMarketScreen extends Screen {
         }
     }
 
+    @Override
     public void resize(@NotNull Minecraft m, int a, int b) {
-        String temp = searchBox.getValue();
+        filterLine = searchBox.getValue();
         this.init(m, a, b);
-        searchBox.setValue(temp);
+        searchBox.setValue(filterLine);
     }
 
     public void tick() {
@@ -509,6 +639,16 @@ public class PolyMarketScreen extends Screen {
     }
 
     private void onSearchButtonPressed() {
+        search();
+    }
+
+    private void onReloadButtonPressed() {
+        reload();
+    }
+
+    private void onValidOnlyToggleButtonPressed() {
+        isValidOnly = !isValidOnly;
+        reloadWidgets();
     }
 
     private void onLeftArrowButtonPressed() {
@@ -543,6 +683,17 @@ public class PolyMarketScreen extends Screen {
     }
 
     private void onItemButtonPressed(int index) {
+        int itemObjectListIndex = (pageNumber - 1) * 6 + index;
+        mc.setScreen(new ItemDetailScreen(getItemObjectsList().get(itemObjectListIndex)));
+    }
+
+    private List<List<ItemObject>> getItemObjectsList() {
+        if (isFiltered)
+            return filteredList;
+        if (!isValidOnly)
+            return client.getItemObjectsList();
+        else
+            return client.getValidItemObjectsList();
     }
 
     int getRegularX() {

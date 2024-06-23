@@ -2,12 +2,20 @@
   "pmh.label.title_suffix": " 물품 목록",
 
   "pmh.label.name": "이름",
-  "pmh.label.quantity": "수량",
+  "pmh.label.amount": "수량",
   "pmh.label.price": "가격",
-  "pmh.label.unit_price": "단위가격",
+  "pmh.label.unit_price": "개당가격",
+  "pmh.label.stock": "재고",
+  "pmh.label.valid_only": "재고있는 것만 표시",
+  "pmh.label.no_location": "위치 정보 찾을 수 없음",
+
+  "pmh.button.indicate_location.unavailable": "위치 표시 불가",
+  "pmh.button.indicate_location.deactivated": "위치 표시 완료",
+  "pmh.button.indicate_location.activated": "위치 표시",
 
   "pmh.search_box": "아이템 이름으로 검색하세요.",
 
   "key.pmh.category": "폴리 마켓 도우미",
-  "key.pmh.open_screen": "폴리 마켓 열기"
+  "key.pmh.open_screen": "폴리 마켓 열기",
+  "key.pmh.stop_indicating": "위치 표시 해제"
 }

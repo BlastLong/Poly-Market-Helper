@@ -1,7 +1,11 @@
 package com.blastlong.pmh.gui;
 
+import com.blastlong.pmh.PolyMarketHelperClient;
+import com.blastlong.pmh.data.object.ItemObject;
+import com.blastlong.pmh.data.object.LocationObject;
+import com.blastlong.pmh.data.object.ShopObject;
 import com.blastlong.pmh.gui.button.ArrowButton;
-import com.blastlong.pmh.gui.button.ItemButton;
+import com.blastlong.pmh.gui.button.IndicateLocationButton;
 import com.blastlong.pmh.gui.button.ItemDetailButton;
 import com.blastlong.pmh.gui.button.PageNumberButton;
 import com.blastlong.pmh.gui.util.ArrowButtonFlag;
@@ -27,30 +31,43 @@ import java.util.List;
 public class ItemDetailScreen extends Screen {
 
     public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("pmh", "textures/gui/poly_market_background.png");
+    public static final ResourceLocation SHOP_INFO_TEXTURE_LOCATION = new ResourceLocation("pmh", "textures/gui/shop_info.png");
 
-    private static final Rect leftArrowButtonRect = new Rect(50, 146, 13, 6);
-    private static final TextureRect leftArrowButtonDeactivatedTextureRect = new TextureRect(0, 172);
-    private static final TextureRect leftArrowButtonActivatedTextureRect = new TextureRect(13, 172);
-    private static final TextureRect leftArrowButtonHighlightedTextureRect = new TextureRect(26, 172);
+    private static final Rect leftArrowButtonRect = new Rect(50, 151, 13, 6);
+    private static final TextureRect leftArrowButtonDeactivatedTextureRect = new TextureRect(0, 177);
+    private static final TextureRect leftArrowButtonActivatedTextureRect = new TextureRect(13, 177);
+    private static final TextureRect leftArrowButtonHighlightedTextureRect = new TextureRect(26, 177);
 
-    private static final Rect rightArrowButtonRect = new Rect(176, 146, 13, 6);
-    private static final TextureRect rightArrowButtonDeactivatedTextureRect = new TextureRect(0, 178);
-    private static final TextureRect rightArrowButtonActivatedTextureRect = new TextureRect(13, 178);
-    private static final TextureRect rightArrowButtonHighlightedTextureRect = new TextureRect(26, 178);
+    private static final Rect rightArrowButtonRect = new Rect(176, 151, 13, 6);
+    private static final TextureRect rightArrowButtonDeactivatedTextureRect = new TextureRect(0, 183);
+    private static final TextureRect rightArrowButtonActivatedTextureRect = new TextureRect(13, 183);
+    private static final TextureRect rightArrowButtonHighlightedTextureRect = new TextureRect(26, 183);
 
     private static final Coordinate titleLabelCoordinate = new Coordinate(8, 4);
 
-    private static final Rect labelBarRect = new Rect(5, 19, 230, 10);
-    private static final TextureRect labelBarTextureRect = new TextureRect(0, 221);
+    private static final Rect labelBarRect = new Rect(5, 24, 230, 10);
+    private static final TextureRect labelBarTextureRect = new TextureRect(0, 226);
 
-    private static final Coordinate nameLabelCoordinate = new Coordinate(8, 21);
-    private static final Coordinate quantityLabelCoordinate = new Coordinate(130, 21);
-    private static final Coordinate priceLabelCoordinate = new Coordinate(167, 21);
-    private static final Coordinate unitPriceLabelCoordinate = new Coordinate(211, 21);
+    private static final Coordinate nameLabelCoordinate = new Coordinate(8, 26);
+    private static final Coordinate amountLabelCoordinate = new Coordinate(104, 26);
+    private static final Coordinate priceLabelCoordinate = new Coordinate(141, 26);
+    private static final Coordinate unitPriceLabelCoordinate = new Coordinate(187, 26);
+    private static final Coordinate stockLabelCoordinate = new Coordinate(223, 26);
 
-    private static final Rect itemButtonRect = new Rect(5, 33, 230, 15);
-    private static final TextureRect itemButtonTextureRect = new TextureRect(0, 157);
-    private static final TextureRect itemButtonHighlightTextureRect = new TextureRect(0, 184);
+    private static final Rect itemButtonRect = new Rect(5, 38, 230, 15);
+    private static final TextureRect itemButtonTextureRect = new TextureRect(0, 162);
+    private static final TextureRect itemButtonHighlightTextureRect = new TextureRect(0, 189);
+
+    private static final Rect shopInfoRect = new Rect(241, 38, 100, 62);
+    private static final TextureRect shopInfoTextureRect = new TextureRect(0, 0);
+    private static final Coordinate shopNameLabelCoordinate = new Coordinate(50, 2);
+    private static final Coordinate shopOwnerLabelCoordinate = new Coordinate(50, 13);
+    private static final Coordinate locationLabelCoordinate = new Coordinate(50, 38);
+
+    private static final Rect indicateLocationButtonRect = new Rect(2, 45, 96, 15);
+    private static final TextureRect indicateLocationButtonDeactivatedTextureRect = new TextureRect(0, 62);
+    private static final TextureRect indicateLocationButtonActivatedTextureRect = new TextureRect(0, 77);
+    private static final TextureRect indicateLocationButtonHighlightedTextureRect = new TextureRect(0, 92);
 
     private static final int titleLabelSize = 10;
     private static final int labelSize = 7;
@@ -62,6 +79,7 @@ public class ItemDetailScreen extends Screen {
     private static final int itemButtonInterval = 3;
 
     private Minecraft mc;
+    private PolyMarketHelperClient client;
 
     private final int width, height;
 
@@ -77,15 +95,26 @@ public class ItemDetailScreen extends Screen {
 
     private final List<PageNumberButton> pageNumberButtonList = new ArrayList<>();
     private final List<ItemDetailButton> itemButtonList = new ArrayList<>();
+    private IndicateLocationButton indicateLocationButton;
+    private String indicateLocationButtonContent;
 
     private String itemName = "TESTITEM";
+    private List<ItemObject> itemObjectList;
 
-    public ItemDetailScreen() {
+    private boolean showShopInfo = false;
+    private ShopObject showingShopObject = null;
+    private boolean isIndicateLocationButtonAvailable = true;
+
+    public ItemDetailScreen(List<ItemObject> itemObjectList) {
         super(Component.literal("Item Detail Screen"));
         mc = Minecraft.getInstance();
+        client = PolyMarketHelperClient.getInstance();
 
         width = 239;
-        height = 157;
+        height = 162;
+
+        this.itemObjectList = itemObjectList;
+        itemName = itemObjectList.get(0).itemName;
     }
 
     protected void init() {
@@ -93,11 +122,20 @@ public class ItemDetailScreen extends Screen {
 
         pageNumberButtonList.clear();
 
+        updateMaxPageNumber();
+
         addArrowButtons();
         addPageNumberButtons();
         addItemButtons();
 
         updateArrowButtonsState();
+
+        if (indicateLocationButton != null)
+            addIndicateLocationButton();
+    }
+
+    private void updateMaxPageNumber() {
+        maxPageNumber = (int) Math.ceil((double) itemObjectList.size() / 6);
     }
 
     private void addArrowButtons() {
@@ -177,7 +215,7 @@ public class ItemDetailScreen extends Screen {
                 width += (stringLength(pageNumber) + pageNumberInterval);
 
             List<Integer> pageNumberList = new ArrayList<>();
-            System.out.println();
+            PolyMarketHelperClient.LOGGER.info("");
             while (true) {
                 if (isLeftEnd) {
                     rightNumber += 1;
@@ -226,7 +264,7 @@ public class ItemDetailScreen extends Screen {
 //            for (Integer integer : pageNumberList) {
 //                output.append(integer).append(", ");
 //            }
-//            System.out.println(output);
+//            PolyMarketHelperClient.LOGGER.info(output);
             if (pageNumber != 1 && pageNumber != maxPageNumber)
                 pageNumberList.add(pageNumber);
 
@@ -299,7 +337,16 @@ public class ItemDetailScreen extends Screen {
     }
 
     private void addItemButtons() {
-        for (int i = 0; i < 6; i++) {
+        int size = itemObjectList.size();
+        int itemButtonCount = Math.min(size - (pageNumber - 1) * 6, 6);
+        for (int i = 0; i < itemButtonCount; i++) {
+            ItemObject itemObject = itemObjectList.get((pageNumber - 1) * 6 + i);
+            String itemName = itemObject.itemName;
+            int amount = itemObject.amount;
+            int stock = itemObject.stock;
+            int price = (int) itemObject.price;
+            float unitPrice = itemObject.unitPrice;
+
             final int finalI = i;
             ItemDetailButton itemButton = new ItemDetailButton(
                     getRegularX() + itemButtonRect.x(),
@@ -307,10 +354,11 @@ public class ItemDetailScreen extends Screen {
                     itemButtonTextureRect.u(), itemButtonTextureRect.v(),
                     itemButtonHighlightTextureRect.u(), itemButtonHighlightTextureRect.v(),
                     itemButtonRect.width(), itemButtonRect.height(),
-                    "ItemName" + i,
-                    (i + 1) * 20,
-                    (i + 1) * 70000,
-                    (float) (10000) / (i+1),
+                    itemName,
+                    amount,
+                    price,
+                    unitPrice,
+                    stock,
                     TEXTURE_LOCATION,
                     button -> {
                         onItemButtonPressed(finalI);
@@ -319,6 +367,35 @@ public class ItemDetailScreen extends Screen {
             addRenderableWidget(itemButton);
             itemButtonList.add(itemButton);
         }
+    }
+
+    private void addIndicateLocationButton() {
+        indicateLocationButton = new IndicateLocationButton(
+                getRegularX() + shopInfoRect.x() + indicateLocationButtonRect.x(),
+                getRegularY() + shopInfoRect.y() + indicateLocationButtonRect.y(),
+                indicateLocationButtonDeactivatedTextureRect,
+                indicateLocationButtonActivatedTextureRect,
+                indicateLocationButtonHighlightedTextureRect,
+                isIndicateLocationButtonAvailable,
+                indicateLocationButtonContent,
+                indicateLocationButtonRect.width(),
+                indicateLocationButtonRect.height(),
+                SHOP_INFO_TEXTURE_LOCATION,
+                button -> {
+                    onIndicateLocationButtonPressed();
+                }
+        );
+        addRenderableWidget(indicateLocationButton);
+    }
+
+    private void removeIndicateLocationButton() {
+        removeWidget(indicateLocationButton);
+        indicateLocationButton = null;
+    }
+
+    private void updateIndicateLocationButton() {
+        removeIndicateLocationButton();
+        addIndicateLocationButton();
     }
 
     private int stringLength(String string) {
@@ -338,6 +415,7 @@ public class ItemDetailScreen extends Screen {
     private void updatePageNumberButtons() {
         clearPageNumberButtons();
         addPageNumberButtons();
+        updateItemButtons();
     }
 
     private void clearItemButtons() {
@@ -358,13 +436,19 @@ public class ItemDetailScreen extends Screen {
         renderTitle(guiGraphics);
         renderLabels(guiGraphics);
         renderDots(guiGraphics);
+
+        if(showShopInfo) {
+            renderShowInfo(guiGraphics);
+            if (indicateLocationButton != null)
+                indicateLocationButton.render(guiGraphics, p_98283_, p_98284_, p_98284_);
+        }
     }
 
     @Override
     public void renderBackground(@NotNull GuiGraphics guiGraphics) {
         // super.renderBackground(guiGraphics);
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        // RenderSystem.setShader(GameRenderer::getPositionTexShader);
         guiGraphics.blit(TEXTURE_LOCATION, getRegularX(), getRegularY(), 0, 0, width, height);
     }
 
@@ -382,9 +466,10 @@ public class ItemDetailScreen extends Screen {
                 labelBarRect.width(), labelBarRect.height());
 
         drawString(guiGraphics, "pmh.label.name", nameLabelCoordinate.x(), nameLabelCoordinate.y(), labelSize);
-        drawCenteredString(guiGraphics, "pmh.label.quantity", quantityLabelCoordinate.x(), quantityLabelCoordinate.y(), labelSize);
+        drawCenteredString(guiGraphics, "pmh.label.amount", amountLabelCoordinate.x(), amountLabelCoordinate.y(), labelSize);
         drawCenteredString(guiGraphics, "pmh.label.price", priceLabelCoordinate.x(), priceLabelCoordinate.y(), labelSize);
         drawCenteredString(guiGraphics, "pmh.label.unit_price", unitPriceLabelCoordinate.x(), unitPriceLabelCoordinate.y(), labelSize);
+        drawCenteredString(guiGraphics, "pmh.label.stock", stockLabelCoordinate.x(), stockLabelCoordinate.y(), labelSize);
     }
 
     private void renderDots(GuiGraphics guiGraphics) {
@@ -404,6 +489,70 @@ public class ItemDetailScreen extends Screen {
                     getRegularX() + rightDotsX,
                     getRegularY() + leftArrowButtonRect.y() + pageNumberButtonOffset);
         }
+    }
+
+    private void renderShowInfo(GuiGraphics guiGraphics) {
+        int baseX = shopInfoRect.x();
+        int baseY = shopInfoRect.y();
+        guiGraphics.blit(SHOP_INFO_TEXTURE_LOCATION,
+                getRegularX() + baseX,
+                getRegularY() + baseY,
+                shopInfoTextureRect.u(), shopInfoTextureRect.v(),
+                shopInfoRect.width(), shopInfoRect.height()
+        );
+
+        drawCenteredString(guiGraphics,
+                showingShopObject.shopName,
+                baseX + shopNameLabelCoordinate.x(),
+                baseY + shopNameLabelCoordinate.y(),
+                9
+        );
+        drawCenteredString(guiGraphics,
+                "by " + showingShopObject.ownerName,
+                baseX + shopOwnerLabelCoordinate.x(),
+                baseY + shopOwnerLabelCoordinate.y(),
+                5
+        );
+
+        LocationObject locationObject = showingShopObject.location;
+        if(locationObject.isAvailable) {
+            drawCenteredString(guiGraphics,
+                    locationObject.toString(),
+                    baseX + locationLabelCoordinate.x(),
+                    baseY + locationLabelCoordinate.y(),
+                    6
+            );
+        }
+        else {
+            drawCenteredString(guiGraphics,
+                    "pmh.label.no_location",
+                    baseX + locationLabelCoordinate.x(),
+                    baseY + locationLabelCoordinate.y(),
+                    5
+            );
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int $$0, int $$1, int $$2) {
+        // super.keyPressed($$0, $$1, $$2);
+
+        if ($$0 == 256) {
+            if (showShopInfo) {
+                showShopInfo = false;
+                showingShopObject = null;
+                if (indicateLocationButton != null) {
+                    removeWidget(indicateLocationButton);
+                    indicateLocationButton = null;
+                    isIndicateLocationButtonAvailable = true;
+                    // 삭제 및 update 함수 만들기
+                }
+            }
+            else {
+                PolyMarketHelperClient.getInstance().openScreen();
+            }
+        }
+        return true;
     }
 
     private void drawCenteredDots(GuiGraphics guiGraphics, int x, int y) {
@@ -491,6 +640,35 @@ public class ItemDetailScreen extends Screen {
     }
 
     private void onItemButtonPressed(int index) {
+        removeIndicateLocationButton();
+        int itemObjectIndex = (pageNumber - 1) * 6 + index;
+        ItemObject itemObject = itemObjectList.get(itemObjectIndex);
+
+        showShopInfo = true;
+        showingShopObject = itemObject.shop;
+        if (showingShopObject.location.isAvailable) {
+            indicateLocationButtonContent = "pmh.button.indicate_location.activated";
+            isIndicateLocationButtonAvailable = true;
+        }
+        else {
+            indicateLocationButtonContent = "pmh.button.indicate_location.unavailable";
+            isIndicateLocationButtonAvailable = false;
+
+        }
+        addIndicateLocationButton();
+        if (showingShopObject.location.isAvailable)
+            indicateLocationButton.active = true;
+        else
+            indicateLocationButton.active = false;
+    }
+
+    private void onIndicateLocationButtonPressed() {
+        client.getLocationIndicator().indicateLocation(showingShopObject.location);
+
+        isIndicateLocationButtonAvailable = false;
+        indicateLocationButtonContent = "pmh.button.indicate_location.deactivated";
+        updateIndicateLocationButton();
+        indicateLocationButton.active = false;
     }
 
     int getRegularX() {

@@ -14,11 +14,17 @@ public class KeyBindings {
             InputConstants.KEY_G,
             "key.pmh.category");
 
+    public static KeyMapping stopIndicatingKey = new KeyMapping(
+            "key.pmh.stop_indicating",
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_H,
+            "key.pmh.category");
     public void register() {
         PolyMarketHelperClient client = PolyMarketHelperClient.getInstance();
-
-        System.out.println("Registered!");
+;
+        PolyMarketHelperClient.LOGGER.info("Key Registered!");
         register(openScreenKey, client::openScreen);
+        register(stopIndicatingKey, client.getLocationIndicator()::stopIndicating);
     }
 
     private void register(KeyMapping keyMapping, KeyBehavior behavior) {

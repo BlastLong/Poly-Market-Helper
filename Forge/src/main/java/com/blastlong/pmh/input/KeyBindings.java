@@ -18,13 +18,21 @@ public class KeyBindings {
             InputConstants.KEY_G,
             "key.pmh.category");
 
+    public static KeyMapping stopIndicatingKey = new KeyMapping(
+            "key.pmh.stop_indicating",
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_H,
+            "key.pmh.category");
+
     public void register() {
         MinecraftForge.EVENT_BUS.register(this);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBindings::registerKeyBindings);
     }
 
     public static void registerKeyBindings(RegisterKeyMappingsEvent event) {
+        PolyMarketHelperClient.LOGGER.info("Key Registered!");
         event.register(openScreenKey);
+        event.register(stopIndicatingKey);
     }
 
     @SubscribeEvent
@@ -34,6 +42,10 @@ public class KeyBindings {
         if(event.phase == TickEvent.Phase.END) {
             while(openScreenKey.consumeClick()) {
                 client.openScreen();
+            }
+
+            while(stopIndicatingKey.consumeClick()) {
+                client.getLocationIndicator().stopIndicating();
             }
         }
     }

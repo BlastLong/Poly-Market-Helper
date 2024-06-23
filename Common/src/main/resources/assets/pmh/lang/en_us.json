@@ -2,12 +2,20 @@
   "pmh.label.title_suffix": " Item List",
 
   "pmh.label.name": "Name",
-  "pmh.label.quantity": "Quantity",
+  "pmh.label.amount": "Amount",
   "pmh.label.price": "Count",
   "pmh.label.unit_price": "Unit Count",
+  "pmh.label.stock": "Stock",
+  "pmh.label.valid_only": "Show valid only",
+  "pmh.label.no_location": "Location is not found",
+
+  "pmh.button.indicate_location.unavailable": "Unavailable",
+  "pmh.button.indicate_location.deactivated": "Location Marked",
+  "pmh.button.indicate_location.activated": "Location Mark",
 
   "pmh.search_box": "Search with item name.",
 
   "key.pmh.category": "Poly Market Helper",
-  "key.pmh.open_screen": "Open Poly Market"
+  "key.pmh.open_screen": "Open Poly Market",
+  "key.pmh.stop_indicating": "Stop Indicating Location"
 }

@@ -12,9 +12,12 @@ public class ItemDetailButton extends ImageButton {
 
     private final static int stringY = 5;
     private final static int itemNameX = 3;
-    private final static int quantityX = 125;
-    private final static int priceX = 162;
-    private final static int unitPriceX = 206;
+    private final static int quantityX = 99;
+    private final static int priceX = 136;
+    private final static int unitPriceX = 182;
+    private final static int stockX = 218;
+
+    private final static int maxItemNameLength = 82;
 
     private final int textureU;
     private final int textureV;
@@ -26,12 +29,13 @@ public class ItemDetailButton extends ImageButton {
     private final int quantity;
     private final int price;
     private final float unitPrice;
+    private final int stock;
 
     public ItemDetailButton(int x, int y,
                             int textureU, int textureV,
                             int highlightU, int highlightV,
                             int width, int height,
-                            String itemName, int quantity, int price, float unitPrice,
+                            String itemName, int quantity, int price, float unitPrice, int stock,
                             ResourceLocation resource, OnPress function) {
         super(x, y, textureU, textureV, width, height, resource, function);
 
@@ -41,10 +45,30 @@ public class ItemDetailButton extends ImageButton {
         this.highlightU = highlightU;
         this.highlightV = highlightV;
 
+        itemName = setLimit(itemName, 7, maxItemNameLength);
         this.itemName = itemName;
         this.quantity = quantity;
         this.price = price;
         this.unitPrice = unitPrice;
+        this.stock = stock;
+    }
+
+    private String setLimit(String content, int size, int limitLength) {
+        Minecraft mc = Minecraft.getInstance();
+
+        boolean isOutOfLimit = false;
+        int componentLength = (int) ((mc.font.width(content) * ((float) size / 9f)));
+        if (componentLength > limitLength)
+            isOutOfLimit = true;
+
+        while(componentLength > limitLength) {
+            content = content.substring(0, content.length() - 1);
+            componentLength = (int) ((mc.font.width(content + "...") * ((float) size / 9f)));
+        }
+
+        if (isOutOfLimit)
+            content += "...";
+        return content;
     }
 
     @Override
@@ -61,6 +85,7 @@ public class ItemDetailButton extends ImageButton {
         drawCenteredString(guiGraphics, "" + quantity, quantityX, stringY, 7);
         drawCenteredString(guiGraphics, "" + price, priceX, stringY, 7);
         drawCenteredString(guiGraphics, String.format("%.1f", unitPrice), unitPriceX, stringY, 7);
+        drawCenteredString(guiGraphics, "" + stock, stockX, stringY, 7);
     }
 
     private void drawString(GuiGraphics guiGraphics, String content, int x, int y, int size) {
