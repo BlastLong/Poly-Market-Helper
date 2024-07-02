@@ -13,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -70,8 +71,63 @@ public class DataManager {
         return itemMap.get("update_date").toString();
     }
 
-
     public static void downloadData() {
+        try {
+
+            // The URL you want to send the GET request to
+            String urlString = "http://dongle.dothome.co.kr/output.json";
+
+            // Create a URL object from the urlString
+            URL url = new URL(urlString);
+
+            // Open a connection to the URL
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            // Set the request method to GET
+            connection.setRequestMethod("GET");
+
+            // Customize request headers if needed
+            /*
+            User-Agent: python-requests/2.32.3
+            Accept-Encoding: gzip, deflate
+            Accept: * / *
+            Connection: keep-alive
+             */
+            connection.setRequestProperty("User-Agent", "python-requests/2.32.3");
+            connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+            connection.setRequestProperty("Accept", "*/*");
+            connection.setRequestProperty("Connection", "keep-alive");
+
+            // Get the HTTP response code
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+
+            downloadResource(connection, directory, dataFileName);
+
+            // Read the response from the server
+            /*
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = reader.readLine()) != null) {
+                response.append(inputLine);
+            }
+            reader.close();
+
+            // Print the response
+            System.out.println("Response Content:\n" + response.toString());
+             */
+
+            // Disconnect the HttpURLConnection
+            connection.disconnect();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void downloadData2() {
         String urlString = "http://dongle.dothome.co.kr/";
         String content = "output.json";
 
@@ -83,9 +139,8 @@ public class DataManager {
             URL resourceUrl = new URL(url, content);
             PolyMarketHelperClient.LOGGER.info("Full URL: " + resourceUrl);
 
-            // Download the resource
             downloadResource(resourceUrl, directory, dataFileName);
-        } catch (MalformedURLException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -247,6 +302,25 @@ public class DataManager {
     private static void downloadResource(URL url, String directory, String fileName) {
         try {
             InputStream in = url.openStream();
+            File file = new File(directory);
+            file.mkdirs();
+            file = new File(directory + File.separator + fileName);
+            FileOutputStream fos = new FileOutputStream(file);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+            PolyMarketHelperClient.LOGGER.info("Downloaded resource to " + fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void downloadResource(HttpURLConnection url, String directory, String fileName) {
+        try {
+            InputStream in = url.getInputStream();
             File file = new File(directory);
             file.mkdirs();
             file = new File(directory + File.separator + fileName);
